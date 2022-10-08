@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package product;
+
+
+service ProductService {
+    rpc CreateProduct(Product) returns (Product);
+    rpc CreateCategory(Category) returns (Category);
+    rpc CreateType(Type) returns(Type);
+    rpc GetProductInfoByid(Ids) returns (GetProducts);
+    rpc UpdateByid(Product) returns(Product);
+    rpc DeleteInfo(Ids) returns(Empty);
+}
+
+message Empty{}
+
+message Ids {
+    repeated string id = 1;
+}
+
+message Product {
+    int64 Id = 1;
+    string Name = 2;
+    string Model = 3;
+    int64 TypeId = 4;
+    int64 CategoryId = 5;
+    float Price = 6;
+    int64 Amount = 7;
+}
+
+
+message Type {
+    int64 Id = 1;
+    string name = 2;
+}
+
+message Category {
+    int64 Id = 1;
+    string name = 2;
+}
+
+message GetProducts {
+    repeated Product products = 1;
+}
