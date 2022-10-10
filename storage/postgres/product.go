@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"fmt"
 	pb "github/FIrstService/template-service/Testproductservice/genproto/product"
 	"log"
 
@@ -11,9 +12,9 @@ type productRepo struct {
 	db *sqlx.DB
 }
 
-// NewUserRepo ...
+// NewProductRepo ...
 
-func NewUserRepo(db *sqlx.DB) *productRepo {
+func NewProductRepo(db *sqlx.DB) *productRepo {
 	return &productRepo{db: db}
 }
 
@@ -46,6 +47,7 @@ func (r *productRepo) CreateType(req *pb.Type) (*pb.Type, error) {
 }
 
 func (r *productRepo) GetProductInfoByid(ids *pb.Ids) (*pb.GetProducts, error) {
+	fmt.Println(ids)
 	response := &pb.GetProducts{}
 	for _, id := range ids.Id {
 		tempUser := &pb.Product{}
@@ -59,8 +61,9 @@ func (r *productRepo) GetProductInfoByid(ids *pb.Ids) (*pb.GetProducts, error) {
 }
 
 func (r *productRepo) UpdateByid(req *pb.Product) (*pb.Product, error) {
-	_, err := r.db.Exec(`UPDATE products SET name=$1, model=$2 where id=$4`,
+	_, err := r.db.Exec(`UPDATE products SET name=$1, model=$2 where id=$3`,
 		req.Name, req.Model, req.Id)
+	fmt.Println(err)
 	return req, err
 }
 

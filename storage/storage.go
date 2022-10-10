@@ -1,6 +1,7 @@
 package storage
 
 import (
+	
 	"github/FIrstService/template-service/Testproductservice/storage/postgres"
 	"github/FIrstService/template-service/Testproductservice/storage/repo"
 
@@ -19,7 +20,7 @@ type storagePg struct {
 func NewStoragePg(db *sqlx.DB) *storagePg {
 	return &storagePg{
 		db:       db,
-		productRepo: postgres.NewUserRepo(db),
+		productRepo: postgres.NewProductRepo(db),
 	}
 }
 
