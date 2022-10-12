@@ -2,9 +2,13 @@ package service
 
 import (
 	"context"
+	"fmt"
 	pb "github/FIrstService/template-service/Testproductservice/genproto/product"
+	"github/FIrstService/template-service/Testproductservice/genproto/stores"
 	l "github/FIrstService/template-service/Testproductservice/pkg/logger"
 	"github/FIrstService/template-service/Testproductservice/storage"
+
+	grpcclient "github/FIrstService/template-service/Testproductservice/service/grpc_client"
 
 	"github.com/jmoiron/sqlx"
 	"google.golang.org/grpc/codes"
@@ -14,29 +18,84 @@ import (
 // ProductService ...
 
 type ProductService struct {
+	store   *grpcclient.ServiceManager
 	storage storage.IStorage
 	logger  l.Logger
 }
 
 // NewProductService ...
 
-func NewProductService(db *sqlx.DB, log l.Logger) *ProductService {
+func NewProductService(store *grpcclient.ServiceManager, db *sqlx.DB, log l.Logger) *ProductService {
 	return &ProductService{
+		store:   store,
 		storage: storage.NewStoragePg(db),
 		logger:  log,
 	}
 }
 
-func (s *ProductService) CreateProduct(ctx context.Context, req *pb.Product) (*pb.Product, error) {
-	product, err := s.storage.Product().CreateProduct(req)
-	if err != nil {
-		s.logger.Error("Error while insert", l.Any("Error insert product", err))
-		return &pb.Product{}, status.Error(codes.Internal, "something went wrong,please check product infto")
+func (s *ProductService) CreateProduct(ctx context.Context, req *pb.ProductFullInfo) (*pb.ProductFullInfoResponse, error) {
+	productReq := &pb.ProductFullInfo{
+		Name:       req.Name,
+		Model:      req.Model,
+		CategoryId: req.CategoryId,
+		TypeId:     req.TypeId,
+		Price:      req.Price,
+		Amount:     req.Amount,
 	}
-	return product, nil
+	productResp, err := s.storage.Product().CreateProduct(productReq)
+	productInfo := pb.ProductFullInfoResponse{
+		Id:         productResp.Id,
+		Name:       productResp.Name,
+		Model:      productResp.Model,
+		CategoryId: productResp.CategoryId,
+		TypeId:     productResp.TypeId,
+		Price:      productResp.Price,
+		Amount:     productResp.Amount,
+	}
+	fmt.Println(productResp, err)
+	if err != nil {
+		s.logger.Error("error while creating product full info in product database", l.Any("error creating product full info in product database", err))
+		return &pb.ProductFullInfoResponse{}, status.Error(codes.Internal, "something went wrong")
+	}
+	for _, storeResp := range req.Stores {
+		storeReq := stores.StoreRequest{}
+		storeReq.Name = storeResp.Name
+		for _, addressResp := range storeReq.Address {
+			storeReq.Address = append(storeReq.Address, &stores.Address{
+				District: addressResp.District,
+				Street:   addressResp.Street,
+			})
+		}
+		addressesResp := []*stores.Address{}
+		for _, addresStoreInfo := range storeReq.Address {
+			addressesResp = append(addressesResp, &stores.Address{
+				District: addresStoreInfo.District,
+				Street:   addresStoreInfo.Street,
+			})
+		}
+		storeReq.Address = addressesResp
+		storeInfo, err := s.store.StoreService().Create(context.Background(), &storeReq)
+		if err != nil {
+			s.logger.Error("error while creating product full info in store database", l.Any("error creating product ful info in store database", err))
+			return &pb.ProductFullInfoResponse{}, status.Error(codes.Internal, "something went wrong")
+		}
+		addressesRespProduct := []*pb.Address{}
+		for _, addresStoreInfo := range storeInfo.Address {
+			addressesRespProduct = append(addressesRespProduct, &pb.Address{
+				District: addresStoreInfo.District,
+				Street:   addresStoreInfo.Street,
+			})
+		}
+		productInfo.Stores = append(productInfo.Stores, &pb.Store{
+			Name:      storeInfo.Name,
+			Addresses: addressesRespProduct,
+		})
+
+	}
+	return &productInfo, nil
 }
 
-func (s *ProductService) CreateCategory(ctx context.Context,req *pb.Category) (*pb.Category,error) {
+func (s *ProductService) CreateCategory(ctx context.Context, req *pb.Category) (*pb.Category, error) {
 	q, err := s.storage.Product().CreateCategory(req)
 	if err != nil {
 		s.logger.Error("Error while insert", l.Any("Error insert product", err))
@@ -45,7 +104,7 @@ func (s *ProductService) CreateCategory(ctx context.Context,req *pb.Category) (*
 	return q, nil
 }
 
-func (s *ProductService) CreateType(ctx context.Context,req *pb.Type) (*pb.Type,error) {
+func (s *ProductService) CreateType(ctx context.Context, req *pb.Type) (*pb.Type, error) {
 	q, err := s.storage.Product().CreateType(req)
 	if err != nil {
 		s.logger.Error("Error while insert", l.Any("Error insert product", err))

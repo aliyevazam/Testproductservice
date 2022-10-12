@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package stores;
+
+
+service StoreService {
+    rpc Create(StoreRequest) returns (StoreResponse);
+    rpc GetStore(GetstoreInfobyid) returns(StoreResponse);
+}
+
+
+message StoreResponse {
+    int64 id = 1;
+    string name = 2;
+    repeated AddressResp address = 3; 
+}
+
+
+message StoreRequest {
+    string name = 1;
+    repeated Address address = 2; 
+}
+
+message GetstoreInfobyid {
+    int64 id = 1;
+}
+
+message AddressResp{
+    int64 id = 1;
+    string district = 2;
+    string street = 3;
+}
+
+message Address {
+    string district = 1;
+    string street = 2;
+}

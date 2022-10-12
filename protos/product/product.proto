@@ -4,7 +4,7 @@ package product;
 
 
 service ProductService {
-    rpc CreateProduct(Product) returns (Product);
+    rpc CreateProduct(ProductFullInfo) returns (ProductFullInfoResponse);
     rpc CreateCategory(Category) returns (Category);
     rpc CreateType(Type) returns(Type);
     rpc GetProductInfoByid(Ids) returns (GetProducts);
@@ -18,8 +18,31 @@ message Ids {
     repeated int64 id = 1;
 }
 
+
+message ProductFullInfoResponse {
+    int64 id = 1;
+    string Name = 2;
+    string Model = 3;
+    int64 TypeId = 4;
+    int64 CategoryId = 5;
+    float Price = 6;
+    int64 Amount = 7;
+    repeated Store stores= 8;
+  }
+  
+
+message ProductFullInfo {
+    string Name = 2;
+    string Model = 3;
+    int64 TypeId = 4;
+    int64 CategoryId = 5;
+    float Price = 6;
+    int64 Amount = 7;
+    repeated Store stores = 8;
+}
+
 message Product {
-    int64 Id = 1;
+    int64 id = 1;
     string Name = 2;
     string Model = 3;
     int64 TypeId = 4;
@@ -41,4 +64,29 @@ message Category {
 
 message GetProducts {
     repeated Product products = 1;
+}
+
+message Store {
+    string name = 1;
+    repeated Address addresses = 2;
+}
+
+message StoreResp {
+    int64 id = 1;
+    string name = 2;
+    repeated Address addresses = 3;
+  }
+
+message ProductRequest{
+    string name = 1;
+    int64 mode=2;
+    int64 categoryId = 3;
+    int64 typeId = 4;
+    float price = 5;
+    int64 amount = 6;
+  } 
+
+message Address {
+    string district = 1;
+    string street = 2;
 }

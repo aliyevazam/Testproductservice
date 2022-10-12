@@ -6,6 +6,10 @@ import (
 	"github/FIrstService/template-service/Testproductservice/pkg/db"
 	"github/FIrstService/template-service/Testproductservice/pkg/logger"
 	"github/FIrstService/template-service/Testproductservice/service"
+
+	grpcclient "github/FIrstService/template-service/Testproductservice/service/grpc_client"
+
+	// grpcclient "github/FIrstService/template-service/Testproductservice/service/grpc_client"
 	"net"
 
 	"google.golang.org/grpc"
@@ -28,7 +32,12 @@ func main() {
 		log.Fatal("sqlx connection to postgres error", logger.Error(err))
 	}
 
-	productService := service.NewProductService(connDB, log)
+	grpcClient, err := grpcclient.New(cfg)
+	if err != nil {
+		log.Fatal("error while connect to clients", logger.Error(err))
+	}
+
+	productService := service.NewProductService(grpcClient,connDB, log)
 
 	lis, err := net.Listen("tcp", cfg.RPCPort)
 	if err != nil {

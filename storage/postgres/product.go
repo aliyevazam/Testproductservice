@@ -18,12 +18,12 @@ func NewProductRepo(db *sqlx.DB) *productRepo {
 	return &productRepo{db: db}
 }
 
-func (r *productRepo) CreateProduct(product *pb.Product) (*pb.Product, error) {
-	productResp := pb.Product{}
+func (r *productRepo) CreateProduct(product *pb.ProductFullInfo) (*pb.ProductFullInfoResponse, error) {
+	productResp := pb.ProductFullInfoResponse{}
 	err := r.db.QueryRow(`insert into products (name,model,typeid,categoryid,price,amount) values ($1,$2,$3,$4,$5,$6)returning id,name,model,typeid,categoryid,price,amount`, product.Name, product.Model, product.TypeId, product.CategoryId, product.Price, product.Amount).Scan(
 		&productResp.Id, &productResp.Name, &product.Model, &productResp.TypeId, &productResp.CategoryId, &productResp.Price, &productResp.Amount)
 	if err != nil {
-		return &pb.Product{}, err
+		return &pb.ProductFullInfoResponse{}, err
 	}
 	return &productResp, nil
 }

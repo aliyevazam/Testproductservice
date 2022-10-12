@@ -19,6 +19,8 @@ type Config struct {
 	RPCPort           string
 	ReviewServiceHost string
 	ReviewServicePort int
+	StoreServiceHost string
+	StoreServicePort int
 }
 
 // Load loads environment vars and inflates Config
@@ -31,8 +33,12 @@ func Load() Config {
 	c.PostgresDatabase = cast.ToString(getOrReturnDefault("POSTGRES_DATABASE", "testdb"))
 	c.PostgresUser = cast.ToString(getOrReturnDefault("POSTGRES_USER", "azam"))
 	c.PostgresPassword = cast.ToString(getOrReturnDefault("POSTGRES_PASSWORD", "Azam_2000"))
+	
+	c.StoreServiceHost = cast.ToString(getOrReturnDefault("Stores_host","localhost"))
+	c.StoreServicePort = cast.ToInt(getOrReturnDefault("Stores_port",9000))
+
 	c.LogLevel = cast.ToString(getOrReturnDefault("LOG_LEVEL", "debug"))
-	c.RPCPort = cast.ToString(getOrReturnDefault("RPC_PORT", ":9000"))
+	c.RPCPort = cast.ToString(getOrReturnDefault("RPC_PORT", ":8000"))
 	return c
 }
 

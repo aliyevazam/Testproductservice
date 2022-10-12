@@ -24,7 +24,7 @@ func (s *ProductSuiteTest) SetupSuite() {
 }
 
 func (s *ProductSuiteTest) TestProductCrud() {
-	productCreate := pb.Product{
+	productCreate := pb.ProductFullInfo{
 		Name:       "new product",
 		Model:      "new model",
 		TypeId:     1,
